@@ -109,8 +109,6 @@ export default class App extends React.Component {
         };
     }
 
-    //LocalStorage max score
-
     async componentDidMount() {
         try {
             const value = await AsyncStorage.getItem("max_score");
