@@ -105,18 +105,19 @@ export default class App extends React.Component {
             score: 0,
             cards: this.cards,
             modalVisible: false,
-            max_score: 0
+            lastMaxScore: 0,
+            maxScore: 0
         };
     }
 
     async componentDidMount() {
         try {
-            const value = await AsyncStorage.getItem("max_score");
-            console.log("value:", value);
+            const value = await AsyncStorage.getItem("maxScore");
+            console.log("value", value);
             if (value !== null) {
-                this.setState({ max_score: value });
+                this.setState({ maxScore: value });
             } else {
-                this.setState({ max_score: 0 });
+                this.setState({ maxScore: 0 });
             }
         } catch (e) {
             console.log("error", e);
@@ -124,26 +125,25 @@ export default class App extends React.Component {
     }
 
     getDataStorage = async () => {
-        let max_score;
+        let maxScore;
         try {
-            const value = await AsyncStorage.getItem("max_score");
-            console.log("value:", value);
+            const value = await AsyncStorage.getItem("maxScore");
             if (value !== null) {
-                max_score = value;
+                maxScore = value;
             } else {
-                this.setState({ max_score: 0 });
+                this.setState({ maxScore: 0 });
             }
         } catch (e) {
-            console.log("error", e);
+            console.log("error getDataStorage:", e);
         }
-        return max_score;
+        return maxScore;
     };
 
     storeData = async (value) => {
         try {
-            await AsyncStorage.setItem("max_score", value);
+            await AsyncStorage.setItem("maxScore", value);
         } catch (e) {
-            // saving error
+            console.log("error storeData:", e);
         }
     };
 
@@ -174,8 +174,11 @@ export default class App extends React.Component {
                         <View style={styles.modalView}>
                             <Text style={styles.modalText}>¡Puntuación!</Text>
                             <Text style={styles.modalTextScore}>{this.state.score}</Text>
-                            <Text style={styles.modalText}>¡Tú Record!</Text>
-                            <Text style={styles.modalTextScore}>{this.state.max_score}</Text>
+                            <Text style={styles.modalText}>⭐ Récord ⭐</Text>
+                            <Text style={[styles.modalTextScore, { color: "gold" }]}>
+                                {this.state.maxScore}
+                            </Text>
+
                             <Pressable
                                 style={[styles.button, styles.buttonClose]}
                                 onPress={() => this.modalVisibleChange()}
@@ -281,21 +284,21 @@ export default class App extends React.Component {
                 this.getDataStorage()
                     .then((value) => {
                         if (value < score) {
-                            this.storeData(JSON.stringify(score));
+                            // this.storeData(JSON.stringify(score));
                             this.setState({
-                                max_score: score
+                                maxScore: score
                             });
                         }
                     })
                     .catch((e) => {
                         console.log("error", e);
                     });
-                this.modalVisibleChange();
-
                 //LocalStorage max score
-                if (score > this.state.max_score) {
+                if (this.state.score > this.state.maxScore) {
                     this.storeData(JSON.stringify(score));
                 }
+
+                this.modalVisibleChange();
             }
 
             this.setState({
@@ -363,7 +366,8 @@ const styles = StyleSheet.create({
     button: {
         borderRadius: 20,
         padding: 10,
-        elevation: 20
+        elevation: 20,
+        marginTop: 15
     },
     buttonOpen: {
         backgroundColor: "#F194FF"
